@@ -1,14 +1,17 @@
 # Stock Catalyst Analyzer
 
-An AI-powered tool that identifies potential catalysts for stock price movements by analyzing recent news, SEC filings, and market data.
+An AI-powered tool that identifies potential catalysts for stock price movements by analyzing data from **9 different sources** including news, social media, SEC filings, and market data.
 
 ## Features
 
-- **Weighted News Analysis**: Fetches news from the past 48 hours with recency weighting (more recent = higher weight)
-- **SEC Filing Integration**: Automatically checks for recent SEC filings (8-K, 10-K, 10-Q, etc.)
-- **Market Context**: Retrieves current price, volume, and sector information
-- **AI-Powered Analysis**: Uses Claude AI to synthesize all data and identify catalysts
-- **Detailed Breakdown**: Shows weighted news, filing details, and comprehensive analysis
+- **Multi-Source News Aggregation**: Gathers news from 6+ sources (NewsAPI, Finnhub, Alpha Vantage, Google News, Reddit, StockTwits)
+- **Weighted Recency System**: Recent news gets higher priority (48-hour sliding window)
+- **Social Sentiment Analysis**: Tracks Reddit (r/wallstreetbets, r/stocks) and StockTwits for retail sentiment
+- **SEC Filing Monitor**: Detects material events (8-K), insider trading (Form 4), and quarterly/annual reports
+- **Options Flow Analysis**: Monitors put/call ratios and unusual options activity
+- **Source Value Analytics**: Shows which data sources provide the most timely/valuable information
+- **AI-Powered Synthesis**: Claude AI analyzes all data to identify primary catalysts
+- **Sentiment Tracking**: Captures sentiment scores from multiple sources when available
 
 ## Recency Weighting System
 
@@ -40,17 +43,43 @@ cp .env.example .env
 # Edit .env and add your API keys
 ```
 
-## API Keys Required
+## Data Sources
 
-### NewsAPI (Free Tier Available)
-1. Go to [newsapi.org](https://newsapi.org/)
-2. Sign up for a free API key
-3. Free tier includes 100 requests/day
+The tool aggregates data from 9 different sources:
 
-### Anthropic API Key
-1. Go to [console.anthropic.com](https://console.anthropic.com/)
-2. Create an API key
-3. Add credits to your account
+| Source | Cost | Setup Required | Latency | Value |
+|--------|------|----------------|---------|-------|
+| **NewsAPI** | Free/Paid | ✅ API Key | Minutes | Broad news coverage |
+| **Finnhub** | Free/Paid | ✅ API Key | Seconds | Real-time financial news + sentiment |
+| **Alpha Vantage** | Free/Paid | ✅ API Key | Minutes | News sentiment analysis |
+| **Google News** | Free | ❌ None | Minutes | Quick aggregation, no setup |
+| **Reddit** | Free | ✅ OAuth | Real-time | Retail investor sentiment |
+| **StockTwits** | Free | ❌ None | Real-time | Social sentiment (Bullish/Bearish) |
+| **SEC EDGAR** | Free | ❌ None | Hours | Official filings, insider trading |
+| **Yahoo Finance** | Free | ❌ None | Minutes | Market data, options, earnings |
+| **Twitter/X** | Paid | ❌ Skip | Real-time | (Not recommended - expensive API) |
+
+**📖 Detailed Setup Guide**: See [DATA_SOURCES_GUIDE.md](DATA_SOURCES_GUIDE.md) for step-by-step instructions for each source.
+
+### Minimum Setup (Start Here)
+
+**Only ONE API key is truly required:**
+- ✅ **Anthropic API** ([Get it here](https://console.anthropic.com/))
+
+**Three sources work without any setup:**
+- ✅ Google News (RSS feeds)
+- ✅ StockTwits (public API)
+- ✅ SEC EDGAR (public API)
+- ✅ Yahoo Finance (yfinance library)
+
+### Recommended Setup (Better Results)
+
+Add these free API keys for significantly better catalyst detection:
+1. **Finnhub** ([Sign up](https://finnhub.io/register)) - 2 min setup, very timely
+2. **NewsAPI** ([Sign up](https://newsapi.org/)) - 2 min setup, broad coverage
+3. **Reddit** ([Create app](https://www.reddit.com/prefs/apps)) - 5 min setup, retail sentiment
+
+**Result**: With all 3 recommended sources, you'll have **7 out of 9 data sources** active!
 
 ## Usage
 
@@ -78,39 +107,79 @@ python main.py AMZN Amazon
 
 ## Output
 
-The tool provides a detailed breakdown including:
+The tool provides a comprehensive multi-section analysis:
 
-1. **Data Collection Summary**: Overview of gathered news, filings, and market data
-2. **Weighted News Breakdown**: Top 15 news articles with recency weights
-3. **Claude AI Analysis**:
-   - Primary catalysts identified
-   - News sentiment analysis
-   - Volume and price context
-   - SEC filing impact
-   - Confidence assessment
-   - Executive summary
+### 1. Data Collection Summary
+- Total articles collected from each source
+- Recency distribution (Very Recent, Recent, Moderately Recent, Older)
+- Source distribution (which sources contributed how many articles)
+- SEC filings detected (8-K, 10-Q, 10-K, Form 4)
+- Insider trading activity
+- Market data (price change, volume ratio)
+- Options activity (put/call ratio)
+
+### 2. Data Source Value Report ⭐ NEW
+- **Source Performance Rankings**: Which sources provided the most valuable data
+- **Average Weight by Source**: Timeliness of each data source
+- **High-Value Article Count**: Articles published in last 24 hours per source
+- **Cost Analysis**: Free vs. paid tier indicators
+- **Recommendations**: Which paid sources are worth upgrading
+
+Example output:
+```
+Source Performance (ranked by value):
+Source          Articles  Avg Weight  High-Value  Cost    Latency
+----------------------------------------------------------------
+★ Finnhub       15        0.850       12 (80%)    free    seconds
+★ Reddit        8         0.725       6 (75%)     free    real-time
+★ NewsAPI       20        0.650       10 (50%)    free    minutes
+```
+
+### 3. Weighted News Breakdown
+- Top 15 articles with recency weights
+- Source attribution (e.g., "Reuters via Finnhub")
+- Sentiment indicators (🟢 Positive, 🔴 Negative, ⚪ Neutral)
+- Hours since publication
+- Article descriptions
+
+### 4. Claude AI Analysis
+- **Primary Catalysts**: Clear drivers of price movement
+- **News Sentiment**: Overall tone and themes
+- **Volume & Price Context**: Technical analysis
+- **SEC Filing Impact**: Material events and insider activity
+- **Confidence Rating**: HIGH/MEDIUM/LOW based on clarity of catalysts
+- **Executive Summary**: 2-3 sentence answer to "Why is this stock moving?"
 
 ## Project Structure
 
 ```
 stock-news-test/
-├── main.py           # Entry point and orchestration
-├── gatherers.py      # Data gathering (news, SEC, market data)
-├── analyzer.py       # Claude AI integration
-├── config.py         # Configuration and weighting system
-├── requirements.txt  # Python dependencies
-├── .env.example      # Example environment variables
-└── README.md         # This file
+├── main.py                  # Entry point and orchestration
+├── gatherers.py             # Multi-source data gathering (9 sources)
+├── analyzer.py              # Claude AI integration
+├── source_analytics.py      # Source value analysis and reporting
+├── config.py                # Configuration, API keys, weighting system
+├── requirements.txt         # Python dependencies
+├── .env.example             # Example environment variables
+├── DATA_SOURCES_GUIDE.md    # Detailed setup guide for all 9 sources
+└── README.md                # This file
 ```
 
 ## How It Works
 
-1. **Fetch News**: Retrieves articles from NewsAPI for the past 48 hours
-2. **Calculate Weights**: Assigns recency weights based on publication time
-3. **Check SEC Filings**: Queries SEC EDGAR for recent filings
-4. **Get Market Data**: Uses yfinance to fetch current price, volume, and context
-5. **AI Analysis**: Sends all weighted data to Claude for comprehensive analysis
-6. **Display Results**: Shows detailed breakdown and AI-generated insights
+### Data Gathering (Multi-Source Aggregation)
+1. **News Aggregation**: Fetches from NewsAPI, Finnhub, Alpha Vantage, Google News
+2. **Social Sentiment**: Scrapes Reddit (WSB, stocks, investing) and StockTwits
+3. **SEC Filings**: Queries EDGAR for 8-K, 10-K, 10-Q, Form 4 filings
+4. **Market Data**: Uses yfinance for price, volume, options, earnings calendar
+5. **Deduplication**: Removes duplicate articles across sources
+6. **Recency Weighting**: Assigns 0.2-1.0 weights based on publication time
+
+### Analysis Pipeline
+7. **Source Analytics**: Calculates which sources provided the most valuable data
+8. **Sentiment Aggregation**: Combines sentiment scores from multiple sources
+9. **AI Synthesis**: Claude analyzes all weighted data for catalyst identification
+10. **Multi-Section Output**: Displays source value report, weighted news, and AI insights
 
 ## Configuration
 
@@ -121,20 +190,68 @@ Edit `config.py` to customize:
 - `SEC_LOOKBACK_DAYS`: How far back to check SEC filings (default: 7 days)
 - `WEIGHT_TIERS`: Customize the recency weighting system
 
-## Limitations
+## Understanding the Source Value Report
 
-- NewsAPI free tier limited to 100 requests/day
-- SEC EDGAR API requires proper user agent
-- Market data relies on yfinance (unofficial Yahoo Finance API)
-- Analysis quality depends on available news and data
+After each run, you'll see which data sources performed best:
+
+**What the metrics mean:**
+- **Avg Weight**: Higher = more timely data (0.7+ is excellent)
+- **High-Value %**: Percentage of articles from last 24 hours
+- **★ Symbol**: Indicates a high-performing source worth using/upgrading
+
+**How to use this data:**
+1. Run the tool 3-5 times on different stocks
+2. Note which sources consistently rank high
+3. For high-value **freemium** sources, consider upgrading to paid tier
+4. For low-value paid sources, consider downgrading or canceling
+
+## Rate Limits & Constraints
+
+| Source | Free Tier Limit | Constraint |
+|--------|----------------|------------|
+| NewsAPI | 100/day | Daily cap, upgrade for more |
+| Finnhub | 60/min | Rate limit, rarely hit |
+| Alpha Vantage | 5/min, 500/day | Slowest free tier |
+| Google News | Unlimited | RSS parsing can be flaky |
+| Reddit | 60/min | OAuth refresh needed |
+| StockTwits | 200/hour | Generous, rarely hit |
+| SEC EDGAR | 10/second | Very generous |
+| Yahoo Finance | 2000/hour | Via yfinance, unofficial |
+
+## Known Limitations
+
+- **Duplicate Detection**: May occasionally show near-duplicate articles from different sources
+- **Sentiment Accuracy**: Automated sentiment can misread sarcasm or complex language
+- **Reddit Rate Limits**: OAuth token expires, may need to re-authenticate
+- **yfinance Reliability**: Unofficial API, can break if Yahoo changes structure
+- **Alpha Vantage Speed**: 5 calls/min on free tier is quite slow
+
+## Troubleshooting
+
+**"Info: [SOURCE] not found, skipping"**
+- Normal behavior - source doesn't have API key configured
+- Tool gracefully continues with other sources
+
+**Rate limit errors**
+- Wait 1 minute and try again
+- Consider upgrading to paid tier for that source
+- Or run less frequently
+
+**No high-value articles found**
+- Stock may not have recent news/catalysts
+- Try during market hours or after earnings
+- Add more data sources for better coverage
 
 ## Future Enhancements
 
-- Support for multiple stocks in one run
-- Historical trend analysis
-- Social media sentiment integration
-- Email/Slack notifications for catalyst alerts
-- Web dashboard interface
+Potential additions:
+- [ ] Historical catalyst tracking (what drove past movements)
+- [ ] Multi-stock batch analysis
+- [ ] Email/Slack/Discord notifications for new catalysts
+- [ ] Web dashboard interface
+- [ ] Export to PDF/JSON
+- [ ] Customizable alert thresholds
+- [ ] Integration with trading platforms
 
 ## License
 

@@ -9,9 +9,22 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# API Keys
-NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
+# API Keys - Core
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+# API Keys - News Sources
+NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+
+# API Keys - Social Media
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
+REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "StockExplainerBot/1.0")
+STOCKTWITS_API_KEY = os.getenv("STOCKTWITS_API_KEY")
+
+# API Keys - Twitter/X (optional, for scraping)
+TWITTER_BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")  # If available
 
 # Stock Configuration
 DEFAULT_SYMBOL = "NVDA"
@@ -20,6 +33,22 @@ DEFAULT_COMPANY_NAME = "NVIDIA"
 # Time Windows
 NEWS_LOOKBACK_HOURS = 48
 SEC_LOOKBACK_DAYS = 7  # Check for SEC filings in past week
+REDDIT_LOOKBACK_HOURS = 24  # Reddit posts/comments
+TWITTER_LOOKBACK_HOURS = 12  # Twitter is very fast-moving
+
+# Data Source Metadata
+# Track which sources are free vs paid, and their characteristics
+DATA_SOURCES = {
+    "NewsAPI": {"cost": "free", "tier": "freemium", "limit": "100/day", "latency": "minutes"},
+    "Finnhub": {"cost": "free", "tier": "freemium", "limit": "60/min", "latency": "seconds"},
+    "AlphaVantage": {"cost": "free", "tier": "freemium", "limit": "5/min", "latency": "minutes"},
+    "GoogleNews": {"cost": "free", "tier": "free", "limit": "unlimited", "latency": "minutes"},
+    "Reddit": {"cost": "free", "tier": "free", "limit": "60/min", "latency": "real-time"},
+    "StockTwits": {"cost": "free", "tier": "freemium", "limit": "200/hour", "latency": "real-time"},
+    "SEC-Edgar": {"cost": "free", "tier": "free", "limit": "10/sec", "latency": "minutes-hours"},
+    "YahooFinance": {"cost": "free", "tier": "free", "limit": "2000/hour", "latency": "minutes"},
+    "Twitter": {"cost": "paid", "tier": "paid", "limit": "varies", "latency": "real-time"},
+}
 
 # Recency Weighting Configuration
 # News articles are weighted based on how recent they are
